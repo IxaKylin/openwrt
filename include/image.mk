@@ -768,9 +768,11 @@ define Device/Build/image
 
   $(BIN_DIR)/$(call DEVICE_IMG_NAME,$(1),$(2)).gz: $(KDIR)/tmp/$(call DEVICE_IMG_NAME,$(1),$(2))
 	gzip -c -9n $$^ > $$@
+	KDIR="$(KDIR)" $$(TOPDIR)/scripts/add-seq-suffix.sh $$@
 
   $(BIN_DIR)/$(call DEVICE_IMG_NAME,$(1),$(2)): $(KDIR)/tmp/$(call DEVICE_IMG_NAME,$(1),$(2))
 	cp $$^ $$@
+	KDIR="$(KDIR)" $$(TOPDIR)/scripts/add-seq-suffix.sh $$@
 
   $(BUILD_DIR)/json_info_files/$(call DEVICE_IMG_NAME,$(1),$(2)).json: $(BIN_DIR)/$(call DEVICE_IMG_NAME,$(1),$(2))$$(GZ_SUFFIX)
 	@mkdir -p $$(shell dirname $$@)
@@ -970,6 +972,8 @@ define BuildImage
     image_prepare: compile compile-dtb
 		mkdir -p $(BIN_DIR) $(KDIR)/tmp
 		rm -rf $(BUILD_DIR)/json_info_files
+		@$(TOPDIR)/scripts/build-seq.sh init
+		@$(TOPDIR)/scripts/build-seq.sh get > $(KDIR)/tmp/.build_seq
 		$(call Image/Prepare)
 
   else

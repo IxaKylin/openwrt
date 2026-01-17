@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Copyright (C) 2024 OpenWrt.org
+#
+# Standard OpenWrt configuration
+# This is a generic configuration suitable for most OpenWrt builds
+#
+
+CONFIG_MODULES=y
+CONFIG_HAVE_DOT_CONFIG=y
+CONFIG_HOST_OS_LINUX=y
+
+# No specific target selected - run menuconfig to select
+# CONFIG_TARGET_multi-profile=y
+
+# Base system
+CONFIG_PACKAGE_base-files=y
+CONFIG_PACKAGE_busybox=y
+CONFIG_PACKAGE_procd=y
+CONFIG_PACKAGE_ubus=y
+CONFIG_PACKAGE_ubusd=y
+CONFIG_PACKAGE_rpcd=y
+CONFIG_PACKAGE_netifd=y
+CONFIG_PACKAGE_ip-full=y
+CONFIG_PACKAGE_iptables=y
+CONFIG_PACKAGE_kmod-ipt-core=y
+CONFIG_PACKAGE_kmod-ipt-nat=y
+CONFIG_PACKAGE_dnsmasq=y
+CONFIG_PACKAGE_firewall=y
+
+# Common utilities
+CONFIG_PACKAGE_uci=y
+CONFIG_PACKAGE_uclient-fetch=y
+CONFIG_PACKAGE_libgcc=y
+
+# Build options
+CONFIG_TARGET_IMAGES_GZIP=y
+
+# Disable debugging for smaller images
+# CONFIG_DEBUG is not set
+
+# Development tools (uncomment if needed)
+# CONFIG_PACKAGE_gdb=y
+# CONFIG_PACKAGE_strace=y
+# CONFIG_PACKAGE_tcpdump=y

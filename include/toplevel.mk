@@ -123,6 +123,63 @@ defconfig: scripts/config/conf prepare-tmpinfo FORCE
 	[ -L .config ] && export KCONFIG_OVERWRITECONFIG=1; \
 		$< $(KCONF_FLAGS) --defconfig=.config Config.in
 
+# Load defconfig from configs/ directory (similar to Linux kernel)
+# Usage: make <config>_defconfig
+# Example: make mediatek_filogic_defconfig
+%_defconfig: scripts/config/conf prepare-tmpinfo FORCE
+	@if [ -f "$(TOPDIR)/configs/$@" ]; then \
+		echo "Loading defconfig $@"; \
+		cp "$(TOPDIR)/configs/$@" .config; \
+		[ -L .config ] && export KCONFIG_OVERWRITECONFIG=1; \
+		$< $(KCONF_FLAGS) --defconfig=.config Config.in; \
+	elif [ -f "$(HOME)/.openwrt/defconfig" ]; then \
+		echo "No configs/$@ found, using ~/.openwrt/defconfig"; \
+		cp $(HOME)/.openwrt/defconfig .config; \
+		$< $(KCONF_FLAGS) --defconfig=.config Config.in; \
+	else \
+		echo "ERROR: configs/$@ not found"; \
+		echo "Available defconfigs:"; \
+		for cfg in $(TOPDIR)/configs/*_defconfig; do \
+			if [ -f "$$cfg" ]; then \
+				name=$$(basename "$$cfg" | sed 's/_defconfig$$//'); \
+				desc=$$(head -20 "$$cfg" | grep -E "^#.*configuration|^#.*Configuration" | head -1 | sed 's/^# *//'); \
+				printf "  %-30s %s\n" "$$name" "$$desc"; \
+			fi; \
+		done; \
+		if [ -z "$$(ls $(TOPDIR)/configs/*_defconfig 2>/dev/null)" ]; then \
+			echo "  (No defconfigs found)"; \
+		fi; \
+		exit 1; \
+	fi
+
+# Save current configuration to configs/ directory
+# Usage: make savedefconfig DEFCONFIG=<name>
+# Example: make savedefconfig DEFCONFIG=my_custom_config
+savedefconfig: scripts/config/conf prepare-tmpinfo FORCE
+	@if [ -z "$(DEFCONFIG)" ]; then \
+		echo "Usage: make savedefconfig DEFCONFIG=<name>"; \
+		echo "Example: make savedefconfig DEFCONFIG=my_custom_config"; \
+		exit 1; \
+	fi
+	@mkdir -p $(TOPDIR)/configs
+	@echo "Saving current configuration to configs/$(DEFCONFIG)"; \
+	cp .config $(TOPDIR)/configs/$(DEFCONFIG); \
+	echo "Configuration saved to configs/$(DEFCONFIG)"
+
+# List all available defconfigs in configs/ directory
+list_defconfigs: FORCE
+	@echo "Available defconfigs in configs/:"
+	@for cfg in $(TOPDIR)/configs/*_defconfig; do \
+		if [ -f "$$cfg" ]; then \
+			name=$$(basename "$$cfg" | sed 's/_defconfig$$//'); \
+			desc=$$(head -20 "$$cfg" | grep -E "^#.*configuration|^#.*Configuration" | head -1 | sed 's/^# *//'); \
+			printf "  %-30s %s\n" "$$name" "$$desc"; \
+		fi; \
+	done; \
+	if [ -z "$$(ls $(TOPDIR)/configs/*_defconfig 2>/dev/null)" ]; then \
+		echo "  (No defconfigs found)"; \
+	fi
+
 confdefault-y=allyes
 confdefault-m=allmod
 confdefault-n=allno

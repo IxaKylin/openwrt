@@ -77,6 +77,24 @@ fi
 
 NEW_FILE="${DIR}/${NEW_BASENAME}"
 
+# Remove old files with same base name pattern (before the date suffix)
+# Pattern: remove old files like *-squashfs-sysupgrade-YYYYMMDD-N.bin
+# Example: openwrt-*-glinet_gl-mt3000-squashfs-sysupgrade-*.bin
+if [ -n "$EXT" ]; then
+    # Pattern to match old files: basepattern-YYYYMMDD-N.EXT
+    # The basepattern is everything before the extension
+    # We need to find and remove files matching: NAME_WITHOUT_EXT-[0-9]*-[0-9]*.EXT
+    find "$DIR" -maxdepth 1 -type f \
+        -name "${NAME_WITHOUT_EXT}-[0-9]*-[0-9]*.${EXT}" \
+        ! -name "${NEW_BASENAME}" \
+        -delete 2>/dev/null || true
+else
+    find "$DIR" -maxdepth 1 -type f \
+        -name "${NAME_WITHOUT_EXT}-[0-9]*-[0-9]*" \
+        ! -name "${NEW_BASENAME}" \
+        -delete 2>/dev/null || true
+fi
+
 # Rename the file
 mv "$FILE" "$NEW_FILE"
 

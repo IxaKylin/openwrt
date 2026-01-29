@@ -46,10 +46,13 @@ check_date_change() {
         echo "1" > "$COUNTER_FILE"
         echo "1"
     else
-        # Same date, read and increment counter
+        # Same date, read counter
         local counter=1
         if [ -f "$COUNTER_FILE" ]; then
             counter=$(cat "$COUNTER_FILE" 2>/dev/null || echo "1")
+        else
+            # First time today, initialize counter file
+            echo "1" > "$COUNTER_FILE"
         fi
         echo "$counter"
     fi

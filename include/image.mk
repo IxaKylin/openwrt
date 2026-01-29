@@ -972,7 +972,6 @@ define BuildImage
     image_prepare: compile compile-dtb
 		mkdir -p $(BIN_DIR) $(KDIR)/tmp
 		rm -rf $(BUILD_DIR)/json_info_files
-		@$(TOPDIR)/scripts/build-seq.sh init
 		@$(TOPDIR)/scripts/build-seq.sh get > $(KDIR)/tmp/.build_seq
 		$(call Image/Prepare)
 

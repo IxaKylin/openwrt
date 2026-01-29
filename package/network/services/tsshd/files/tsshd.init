@@ -1,0 +1,47 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2025 OpenWrt.org
+
+START=50
+STOP=50
+
+USE_PROCD=1
+PROG=/usr/bin/tsshd
+NAME=tsshd
+
+start_service() {
+	config_load tsshd
+	config_foreach start_tsshd_instance tsshd
+}
+
+start_tsshd_instance() {
+	local enable port kcp_mode quic_mode
+
+	config_get_bool enable "$1" enable 1
+	[ "$enable" -gt 0 ] || return
+
+	config_get port "$1" port '61001-61999'
+	config_get_bool kcp_mode "$1" kcp_mode 0
+	config_get_bool quic_mode "$1" quic_mode 0
+
+	procd_open_instance
+	procd_set_param command "$PROG"
+
+	# Add port range
+	procd_append_param command "-p" "$port"
+
+	# Add KCP mode if enabled
+	[ "$kcp_mode" -gt 0 ] && procd_append_param command "--kcp"
+
+	# Add QUIC mode if enabled (quic mode is mutually exclusive with kcp)
+	[ "$quic_mode" -gt 0 ] && procd_append_param command "--quic"
+
+	procd_set_param respawn
+	procd_set_param stderr 1
+	procd_set_param stdout 1
+
+	procd_close_instance
+}
+
+service_triggers() {
+	procd_add_reload_trigger "tsshd"
+}
